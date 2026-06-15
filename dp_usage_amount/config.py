@@ -20,7 +20,7 @@ class ConfigManager:
     def _get_default_config(self):
         return {
             'api': {
-                'key': '',
+                'key': 'your-api-key-here',
                 'base_url': 'https://api.deepseek.com'
             },
             'display': {
