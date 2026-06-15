@@ -19,7 +19,8 @@ class UsageWindow(QMainWindow):
     def setup_ui(self):
         self.setWindowTitle("DeepSeek 使用量监控")
         width, height = self.config.get_window_size()
-        self.setFixedSize(width, height)
+        self.setMinimumSize(width, height)
+        self.resize(width, height)
 
         if self.config.is_always_on_top():
             self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)

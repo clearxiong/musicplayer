@@ -40,3 +40,24 @@ def test_window_update_data(app):
     window.update_data(data)
     assert "12,345" in window.tokens_label.text()
     assert "98.76" in window.balance_label.text()
+
+def test_window_resizable(app):
+    """测试窗口可以调整大小"""
+    config = Mock(spec=ConfigManager)
+    config.get_window_size.return_value = (300, 150)
+    config.is_always_on_top.return_value = True
+    config.should_show_today_tokens.return_value = True
+    config.should_show_balance.return_value = True
+    config.should_show_last_update.return_value = True
+
+    window = UsageWindow(config)
+
+    # 验证窗口可以调整大小
+    window.resize(400, 200)
+    assert window.width() == 400
+    assert window.height() == 200
+
+    # 验证窗口有最小尺寸限制
+    window.resize(100, 50)
+    assert window.width() >= 300
+    assert window.height() >= 150
