@@ -29,3 +29,25 @@ def test_usage_data_error_state():
     assert data.today_tokens is None
     assert data.balance is None
     assert data.error == "网络错误"
+
+def test_usage_data_from_api_response():
+    """测试从API响应创建UsageData"""
+    response = {
+        'data': {
+            'today_tokens': 12345,
+            'balance': 98.76,
+            'last_update': '2026-06-15 16:30:00'
+        }
+    }
+    data = UsageData.from_api_response(response)
+    assert data.today_tokens == 12345
+    assert data.balance == 98.76
+    assert data.last_update == '2026-06-15 16:30:00'
+    assert not data.is_error()
+
+def test_usage_data_from_api_response_error():
+    """测试从错误API响应创建UsageData"""
+    response = {}
+    data = UsageData.from_api_response(response)
+    assert data.is_error()
+    assert '解析API响应失败' in data.error
