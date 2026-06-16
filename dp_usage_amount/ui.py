@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget, QMenu, QAction
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPainter, QColor, QLinearGradient, QBrush
 from config import ConfigManager
@@ -114,6 +114,53 @@ class UsageWindow(QMainWindow):
         if event.buttons() == Qt.LeftButton and hasattr(self, 'drag_pos'):
             self.move(event.globalPos() - self.drag_pos)
             event.accept()
+
+    def contextMenuEvent(self, event):
+        """右键菜单"""
+        context_menu = QMenu(self)
+        context_menu.setStyleSheet("""
+            QMenu {
+                background-color: rgba(40, 40, 50, 220);
+                color: white;
+                border: 1px solid rgba(255,255,255,30);
+                border-radius: 8px;
+                padding: 5px;
+            }
+            QMenu::item {
+                padding: 8px 20px;
+                border-radius: 4px;
+            }
+            QMenu::item:selected {
+                background-color: rgba(255,255,255,30);
+            }
+        """)
+        
+        # 刷新数据
+        refresh_action = QAction("刷新数据", self)
+        refresh_action.triggered.connect(self.refresh_data)
+        
+        # 打开配置文件
+        open_config_action = QAction("打开配置文件", self)
+        open_config_action.triggered.connect(self.open_config_file)
+        
+        # 关闭窗口
+        close_action = QAction("关闭", self)
+        close_action.triggered.connect(self.close)
+        
+        context_menu.addAction(refresh_action)
+        context_menu.addAction(open_config_action)
+        context_menu.addSeparator()
+        context_menu.addAction(close_action)
+        
+        context_menu.exec_(event.globalPos())
+
+    def open_config_file(self):
+        """打开配置文件"""
+        import os
+        import subprocess
+        config_path = os.path.abspath("config.yaml")
+        if os.path.exists(config_path):
+            subprocess.Popen(["notepad", config_path])
 
     def setup_timer(self):
         self.timer = QTimer(self)
