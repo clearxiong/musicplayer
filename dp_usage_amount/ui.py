@@ -1,5 +1,4 @@
 import ctypes
-from ctypes import wintypes
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
@@ -7,10 +6,23 @@ from config import ConfigManager
 from data import UsageData
 from api import DeepSeekAPI
 
-# Windows API 常量
+
+# Windows DWM API 常量
 DWMWA_USE_IMMERSIVE_DARK_MODE = 20
 DWMWA_SYSTEMBACKDROP_TYPE = 38
-DWMSBT_MAINWINDOW = 2  # 毛玻璃效果
+DWMSBT_MAINWINDOW = 2
+DWMSBT_TRANSIENTWINDOW = 3
+DWMSBT_TABWINDOW = 4
+
+
+class MARGINS(ctypes.Structure):
+    _fields_ = [
+        ("cxLeftWidth", ctypes.c_int),
+        ("cxRightWidth", ctypes.c_int),
+        ("cyTopHeight", ctypes.c_int),
+        ("cyBottomHeight", ctypes.c_int),
+    ]
+
 
 # 加载 dwmapi
 dwmapi = ctypes.windll.dwmapi
@@ -100,25 +112,19 @@ class UsageWindow(QMainWindow):
             ctypes.sizeof(dark_mode)
         )
         
-        # 设置亚克力/毛玻璃背景
-        backdrop_type = ctypes.c_int(DWMSBT_MAINWINDOW)
-        dwmapi.DwmSetWindowAttribute(
-            hwnd,
-            DWMWA_SYSTEMBACKDROP_TYPE,
-            ctypes.byref(backdrop_type),
-            ctypes.sizeof(backdrop_type)
-        )
+        # 尝试设置亚克力/毛玻璃背景
+        for backdrop_type in [DWMSBT_MAINWINDOW, DWMSBT_TRANSIENTWINDOW]:
+            result = dwmapi.DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_SYSTEMBACKDROP_TYPE,
+                ctypes.byref(ctypes.c_int(backdrop_type)),
+                ctypes.sizeof(ctypes.c_int)
+            )
+            if result == 0:  # S_OK
+                break
         
         # 扩展窗口边框到客户区（使效果覆盖整个窗口）
-        class MARGINS(ctypes.Structure):
-            _fields_ = [
-                ("cxLeftWidth", ctypes.c_int),
-                ("cxRightWidth", ctypes.c_int),
-                ("cyTopHeight", ctypes.c_int),
-                ("cyBottomHeight", ctypes.c_int),
-            ]
-        
-        margins = MARGINS(-1, -1, -1, -1)  # -1 表示扩展到整个窗口
+        margins = MARGINS(0, 0, -1, -1)  # -1 表示扩展到整个窗口
         dwmapi.DwmExtendFrameIntoClientArea(hwnd, ctypes.byref(margins))
 
     def mousePressEvent(self, event):
