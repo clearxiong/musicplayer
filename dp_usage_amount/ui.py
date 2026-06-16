@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPainter, QColor
 from config import ConfigManager
 from data import UsageData
 from api import DeepSeekAPI
@@ -56,6 +56,15 @@ class UsageWindow(QMainWindow):
         self.balance_label.setStyleSheet("color: #ffffff; background: transparent;")
         self.used_label.setStyleSheet("color: #ffffff; background: transparent;")
         self.update_label.setStyleSheet("color: #aaaaaa; background: transparent; font-size: 10px;")
+
+    def paintEvent(self, event):
+        # 绘制半透明背景
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setBrush(QColor(30, 30, 30, 200))
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(self.rect(), 10, 10)
+        painter.end()
 
     def setup_timer(self):
         self.timer = QTimer(self)
