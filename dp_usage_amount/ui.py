@@ -19,6 +19,10 @@ class UsageWindow(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle("DeepSeek 余额监控")
+        
+        # 先设置透明属性
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
         width, height = self.config.get_window_size()
         self.setMinimumSize(width, height)
         self.resize(width, height)
@@ -26,11 +30,13 @@ class UsageWindow(QMainWindow):
         if self.config.is_always_on_top():
             self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
+        # 创建半透明背景的central widget
         central_widget = QWidget()
+        central_widget.setStyleSheet("background-color: rgba(30, 30, 30, 200); border-radius: 10px;")
         self.setCentralWidget(central_widget)
 
         layout = QVBoxLayout(central_widget)
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setContentsMargins(15, 15, 15, 15)
 
         self.balance_label = QLabel("余额: 加载中...")
         self.used_label = QLabel("已使用: --")
@@ -46,19 +52,10 @@ class UsageWindow(QMainWindow):
         layout.addWidget(self.used_label)
         layout.addWidget(self.update_label)
 
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: rgba(30, 30, 30, 180);
-            }
-            QLabel {
-                color: #ffffff;
-                padding: 8px;
-                font-size: 14px;
-            }
-        """)
-        
-        # 设置窗口透明
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        # 设置标签样式
+        self.balance_label.setStyleSheet("color: #ffffff; background: transparent;")
+        self.used_label.setStyleSheet("color: #ffffff; background: transparent;")
+        self.update_label.setStyleSheet("color: #aaaaaa; background: transparent; font-size: 10px;")
 
     def setup_timer(self):
         self.timer = QTimer(self)
