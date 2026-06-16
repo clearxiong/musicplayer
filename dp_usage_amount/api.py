@@ -32,12 +32,16 @@ class DeepSeekAPI:
             data = response.json()
             
             # 根据DeepSeek API响应格式解析数据
-            # 响应格式: {"data": {"balance": 0.0, "total_granted": 0.0, "total_used": 0.0, ...}}
-            balance_data = data.get('data', {})
+            # 响应格式: {"is_available": true, "balance_infos": [{"currency": "CNY", "total_balance": "96.39", ...}]}
+            balance_infos = data.get('balance_infos', [])
+            
+            balance = 0.0
+            if balance_infos:
+                balance = float(balance_infos[0].get('total_balance', 0.0))
             
             return UsageData(
                 today_tokens=0,  # 此API不提供今日token用量
-                balance=balance_data.get('balance', 0.0),
+                balance=balance,
                 last_update=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
             

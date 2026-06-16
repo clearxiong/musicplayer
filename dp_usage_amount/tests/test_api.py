@@ -13,11 +13,15 @@ def test_api_get_usage_success(mock_get):
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
-        'data': {
-            'balance': 98.76,
-            'total_granted': 100.0,
-            'total_used': 1.24
-        }
+        'is_available': True,
+        'balance_infos': [
+            {
+                'currency': 'CNY',
+                'total_balance': '98.76',
+                'granted_balance': '0.00',
+                'topped_up_balance': '98.76'
+            }
+        ]
     }
     mock_get.return_value = mock_response
     
