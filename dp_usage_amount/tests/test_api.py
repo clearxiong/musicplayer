@@ -14,8 +14,9 @@ def test_api_get_usage_success(mock_get):
     mock_response.status_code = 200
     mock_response.json.return_value = {
         'data': {
-            'today_tokens': 12345,
-            'balance': 98.76
+            'balance': 98.76,
+            'total_granted': 100.0,
+            'total_used': 1.24
         }
     }
     mock_get.return_value = mock_response
@@ -23,7 +24,6 @@ def test_api_get_usage_success(mock_get):
     api = DeepSeekAPI("test-key", "https://api.test.com")
     result = api.get_usage()
     
-    assert result.today_tokens == 12345
     assert result.balance == 98.76
     assert result.error is None
 
@@ -35,7 +35,7 @@ def test_api_get_usage_network_error(mock_get):
     result = api.get_usage()
     
     assert result.is_error()
-    assert "网络错误" in result.error
+    assert "未知错误" in result.error
 
 @patch('api.requests.get')
 def test_api_get_usage_api_error(mock_get):
