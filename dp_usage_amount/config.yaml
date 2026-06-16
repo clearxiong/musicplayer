@@ -1,0 +1,17 @@
+api:
+  key: "sk-a30fe490393a4d2c9276d0ac44e8c685"
+  base_url: "https://api.deepseek.com"
+
+display:
+  show_today_tokens: true
+  show_balance: true
+  show_last_update: true
+
+refresh:
+  interval_minutes: 5
+  auto_refresh: true
+
+window:
+  width: 300
+  height: 150
+  always_on_top: true
