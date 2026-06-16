@@ -10,7 +10,6 @@ def main():
     
     # 创建应用
     app = QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
     
     # 创建主窗口
     window = UsageWindow(config)
