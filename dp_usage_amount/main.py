@@ -20,4 +20,17 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    main()
+    import requests
+
+    url = "https://api.deepseek.com/user/balance"
+
+    payload={}
+    headers = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer sk-a30fe490393a4d2c9276d0ac44e8c685'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    print(response.text)    
+    # main()

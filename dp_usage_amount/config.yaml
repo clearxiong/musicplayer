@@ -1,5 +1,5 @@
 api:
-  key: "your-api-key-here"
+  key: "sk-a30fe490393a4d2c9276d0ac44e8c685"
   base_url: "https://api.deepseek.com"
 
 display:
