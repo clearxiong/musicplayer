@@ -11,13 +11,14 @@ class UsageWindow(QMainWindow):
         super().__init__()
         self.config = config
         self.api = DeepSeekAPI(config.get_api_key(), config.get_api_base_url())
+        self.initial_balance = None  # 记录初始余额
 
         self.setup_ui()
         self.setup_timer()
         self.refresh_data()
 
     def setup_ui(self):
-        self.setWindowTitle("DeepSeek 使用量监控")
+        self.setWindowTitle("DeepSeek 余额监控")
         width, height = self.config.get_window_size()
         self.setMinimumSize(width, height)
         self.resize(width, height)
@@ -31,18 +32,18 @@ class UsageWindow(QMainWindow):
         layout = QVBoxLayout(central_widget)
         layout.setContentsMargins(10, 10, 10, 10)
 
-        self.tokens_label = QLabel("今日token: 加载中...")
         self.balance_label = QLabel("余额: 加载中...")
+        self.used_label = QLabel("已使用: --")
         self.update_label = QLabel("最后更新: --")
 
         font = QFont()
-        font.setPointSize(10)
-        self.tokens_label.setFont(font)
+        font.setPointSize(12)
         self.balance_label.setFont(font)
+        self.used_label.setFont(font)
         self.update_label.setFont(font)
 
-        layout.addWidget(self.tokens_label)
         layout.addWidget(self.balance_label)
+        layout.addWidget(self.used_label)
         layout.addWidget(self.update_label)
 
         self.setStyleSheet("""
@@ -70,21 +71,19 @@ class UsageWindow(QMainWindow):
 
     def update_data(self, data: UsageData):
         if data.is_error():
-            self.tokens_label.setText(f"错误: {data.error}")
-            self.balance_label.setText("余额: N/A")
+            self.balance_label.setText(f"错误: {data.error}")
+            self.used_label.setText("已使用: N/A")
             self.update_label.setText("最后更新: --")
         else:
-            if self.config.should_show_today_tokens():
-                self.tokens_label.setText(f"今日token: {data.format_tokens()}")
-            else:
-                self.tokens_label.setText("")
-
-            if self.config.should_show_balance():
-                self.balance_label.setText(f"余额: {data.format_balance()}")
-            else:
-                self.balance_label.setText("")
-
-            if self.config.should_show_last_update():
-                self.update_label.setText(f"最后更新: {data.last_update}")
-            else:
-                self.update_label.setText("")
+            current_balance = data.balance
+            
+            # 记录第一次查询的余额作为初始值
+            if self.initial_balance is None:
+                self.initial_balance = current_balance
+            
+            # 计算已使用金额
+            used_amount = self.initial_balance - current_balance
+            
+            self.balance_label.setText(f"余额: ¥{data.format_balance()}")
+            self.used_label.setText(f"已使用: ¥{used_amount:.2f}")
+            self.update_label.setText(f"最后更新: {data.last_update}")
