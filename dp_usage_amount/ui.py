@@ -48,13 +48,17 @@ class UsageWindow(QMainWindow):
 
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #f5f5f5;
+                background-color: rgba(30, 30, 30, 180);
             }
             QLabel {
-                color: #333;
-                padding: 5px;
+                color: #ffffff;
+                padding: 8px;
+                font-size: 14px;
             }
         """)
+        
+        # 设置窗口透明
+        self.setAttribute(Qt.WA_TranslucentBackground)
 
     def setup_timer(self):
         self.timer = QTimer(self)
