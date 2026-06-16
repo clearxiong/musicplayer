@@ -1,31 +1,9 @@
-import ctypes
 from PyQt5.QtWidgets import QMainWindow, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPainter, QColor, QLinearGradient, QBrush
 from config import ConfigManager
 from data import UsageData
 from api import DeepSeekAPI
-
-
-# Windows DWM API 常量
-DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-DWMWA_SYSTEMBACKDROP_TYPE = 38
-DWMSBT_MAINWINDOW = 2
-DWMSBT_TRANSIENTWINDOW = 3
-DWMSBT_TABWINDOW = 4
-
-
-class MARGINS(ctypes.Structure):
-    _fields_ = [
-        ("cxLeftWidth", ctypes.c_int),
-        ("cxRightWidth", ctypes.c_int),
-        ("cyTopHeight", ctypes.c_int),
-        ("cyBottomHeight", ctypes.c_int),
-    ]
-
-
-# 加载 dwmapi
-dwmapi = ctypes.windll.dwmapi
 
 
 class UsageWindow(QMainWindow):
@@ -42,6 +20,9 @@ class UsageWindow(QMainWindow):
     def setup_ui(self):
         self.setWindowTitle("DeepSeek 余额监控")
         
+        # 设置透明窗口
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        
         # 设置窗口标志：无边框 + 置顶
         flags = Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
         self.setWindowFlags(flags)
@@ -50,7 +31,7 @@ class UsageWindow(QMainWindow):
         self.setMinimumSize(width, height)
         self.resize(width, height)
 
-        # 创建central widget - 完全透明，让毛玻璃效果透出来
+        # 创建central widget
         central_widget = QWidget()
         central_widget.setStyleSheet("background: transparent;")
         self.setCentralWidget(central_widget)
@@ -64,7 +45,7 @@ class UsageWindow(QMainWindow):
         title_font = QFont()
         title_font.setPointSize(10)
         self.title_label.setFont(title_font)
-        self.title_label.setStyleSheet("color: #888888; background: transparent;")
+        self.title_label.setStyleSheet("color: rgba(255,255,255,150); background: transparent;")
 
         self.balance_label = QLabel("余额: 加载中...")
         self.used_label = QLabel("已使用: --")
@@ -91,41 +72,36 @@ class UsageWindow(QMainWindow):
         layout.addSpacing(10)
         layout.addWidget(self.update_label)
 
-        # 设置标签样式 - 白色文字
+        # 设置标签样式
         self.balance_label.setStyleSheet("color: #ffffff; background: transparent;")
-        self.used_label.setStyleSheet("color: #e0e0e0; background: transparent;")
-        self.update_label.setStyleSheet("color: #999999; background: transparent;")
+        self.used_label.setStyleSheet("color: rgba(255,255,255,200); background: transparent;")
+        self.update_label.setStyleSheet("color: rgba(255,255,255,120); background: transparent;")
 
-        # 应用毛玻璃效果
-        self.apply_acrylic_effect()
-
-    def apply_acrylic_effect(self):
-        """应用Windows毛玻璃/亚克力效果"""
-        hwnd = int(self.winId())
+    def paintEvent(self, event):
+        """绘制半透明渐变背景"""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
         
-        # 设置深色模式
-        dark_mode = ctypes.c_int(1)
-        dwmapi.DwmSetWindowAttribute(
-            hwnd,
-            DWMWA_USE_IMMERSIVE_DARK_MODE,
-            ctypes.byref(dark_mode),
-            ctypes.sizeof(dark_mode)
-        )
+        # 绘制圆角矩形背景 - 深色半透明渐变
+        rect = self.rect()
         
-        # 尝试设置亚克力/毛玻璃背景
-        for backdrop_type in [DWMSBT_MAINWINDOW, DWMSBT_TRANSIENTWINDOW]:
-            result = dwmapi.DwmSetWindowAttribute(
-                hwnd,
-                DWMWA_SYSTEMBACKDROP_TYPE,
-                ctypes.byref(ctypes.c_int(backdrop_type)),
-                ctypes.sizeof(ctypes.c_int)
-            )
-            if result == 0:  # S_OK
-                break
+        # 创建渐变效果
+        gradient = QLinearGradient(0, 0, 0, rect.height())
+        gradient.setColorAt(0, QColor(40, 40, 50, 200))
+        gradient.setColorAt(0.5, QColor(30, 30, 40, 210))
+        gradient.setColorAt(1, QColor(20, 20, 30, 200))
         
-        # 扩展窗口边框到客户区（使效果覆盖整个窗口）
-        margins = MARGINS(0, 0, -1, -1)  # -1 表示扩展到整个窗口
-        dwmapi.DwmExtendFrameIntoClientArea(hwnd, ctypes.byref(margins))
+        # 绘制圆角背景
+        painter.setBrush(QBrush(gradient))
+        painter.setPen(Qt.NoPen)
+        painter.drawRoundedRect(rect, 12, 12)
+        
+        # 绘制微妙的边框
+        painter.setPen(QColor(255, 255, 255, 30))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 12, 12)
+        
+        painter.end()
 
     def mousePressEvent(self, event):
         """允许拖动窗口"""
