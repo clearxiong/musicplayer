@@ -34,43 +34,58 @@ class UsageWindow(QMainWindow):
         flags = Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
         self.setWindowFlags(flags)
         
-        # 启用鼠标事件穿透（可选，允许点击穿透）
-        # self.setAttribute(Qt.WA_TransparentForMouseEvents)
-        
         width, height = self.config.get_window_size()
         self.setMinimumSize(width, height)
         self.resize(width, height)
 
-        # 创建central widget
+        # 创建central widget - 半透明深色背景
         central_widget = QWidget()
-        central_widget.setStyleSheet("background: transparent;")
+        central_widget.setStyleSheet("""
+            background-color: rgba(24, 24, 24, 180);
+            border-radius: 8px;
+        """)
         self.setCentralWidget(central_widget)
 
         layout = QVBoxLayout(central_widget)
         layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(8)
+
+        # 标题
+        self.title_label = QLabel("DeepSeek")
+        title_font = QFont()
+        title_font.setPointSize(10)
+        self.title_label.setFont(title_font)
+        self.title_label.setStyleSheet("color: #888888; background: transparent;")
 
         self.balance_label = QLabel("余额: 加载中...")
         self.used_label = QLabel("已使用: --")
         self.update_label = QLabel("最后更新: --")
 
-        font = QFont()
-        font.setPointSize(12)
-        self.balance_label.setFont(font)
-        self.used_label.setFont(font)
+        # 余额字体更大更粗
+        balance_font = QFont()
+        balance_font.setPointSize(16)
+        balance_font.setBold(True)
+        self.balance_label.setFont(balance_font)
+        
+        used_font = QFont()
+        used_font.setPointSize(12)
+        self.used_label.setFont(used_font)
         
         small_font = QFont()
         small_font.setPointSize(9)
         self.update_label.setFont(small_font)
 
+        layout.addWidget(self.title_label)
+        layout.addSpacing(5)
         layout.addWidget(self.balance_label)
         layout.addWidget(self.used_label)
         layout.addSpacing(10)
         layout.addWidget(self.update_label)
 
-        # 设置标签样式 - 白色文字，透明背景
-        self.balance_label.setStyleSheet("color: #ffffff; background: transparent; font-weight: bold;")
-        self.used_label.setStyleSheet("color: #ffffff; background: transparent;")
-        self.update_label.setStyleSheet("color: #cccccc; background: transparent;")
+        # 设置标签样式 - 白色文字
+        self.balance_label.setStyleSheet("color: #ffffff; background: transparent;")
+        self.used_label.setStyleSheet("color: #e0e0e0; background: transparent;")
+        self.update_label.setStyleSheet("color: #999999; background: transparent;")
 
         # 应用毛玻璃效果
         self.apply_acrylic_effect()
