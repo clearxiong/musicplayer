@@ -38,12 +38,9 @@ class UsageWindow(QMainWindow):
         self.setMinimumSize(width, height)
         self.resize(width, height)
 
-        # 创建central widget - 半透明深色背景
+        # 创建central widget - 完全透明，让毛玻璃效果透出来
         central_widget = QWidget()
-        central_widget.setStyleSheet("""
-            background-color: rgba(24, 24, 24, 180);
-            border-radius: 8px;
-        """)
+        central_widget.setStyleSheet("background: transparent;")
         self.setCentralWidget(central_widget)
 
         layout = QVBoxLayout(central_widget)
